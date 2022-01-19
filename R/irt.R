@@ -25,11 +25,18 @@ stan_irt <- function(formula, data, ...) {
   stopifnot(length(rhs_vars) == 2)
   stopifnot(length(lhs_vars) == 1)
 
+  person_var <- rlang::sym(rhs_vars[1])
+  item_var <- rlang::sym(rhs_vars[2])
+
+  data <- dplyr::mutate(data,
+                        person_uid = as.numeric(factor( {{ person_var }} )),
+                        item_uid = as.numeric(factor( {{ item_var }})))
+
   model_data <- within(list(), {
 
-    person <- as.numeric(factor(data[[rhs_vars[1]]]))
+    person <- dplyr::pull(data, person_uid)
 
-    item <- as.numeric(factor(data[[rhs_vars[2]]]))
+    item <- dplyr::pull(data, item_uid)
 
     y <- data[[lhs_vars[1]]]
 
@@ -46,6 +53,35 @@ stan_irt <- function(formula, data, ...) {
 
   })
 
-  rstan::sampling(stanmodels$irtv1, data = model_data, ...)
+  M <- rstan::sampling(stanmodels$irtv1, data = model_data, ...)
+
+  samples <- tidybayes::gather_draws(M, alpha[i], beta[i], gamma[i]) %>%
+    dplyr::ungroup()
+
+  results <- list()
+
+  # return all alpha values along with the person_var
+  results[['person']] <- dplyr::left_join(
+    dplyr::select(data, {{ person_var }}, person_uid) %>%
+      dplyr::distinct(),
+     samples %>%
+      dplyr::filter(.variable == 'alpha') %>%
+      dplyr::select(person_uid = i, alpha = .value),
+    by = 'person_uid'
+  ) %>% dplyr::select(-person_uid)
+
+  # return all gamma and beta values along with the item_var
+  results[['item']] <- dplyr::left_join(
+    dplyr::select(data, {{ item_var }}, item_uid) %>%
+      dplyr::distinct(),
+    samples %>%
+      dplyr::filter(.variable %in% c('beta','gamma')) %>%
+      dplyr::select(item_uid = i, .draw, .variable, .value),
+    by = 'item_uid'
+  ) %>% dplyr::select(-item_uid) %>%
+    pivot_wider(names_from = .variable, values_from = .value) %>%
+    select(-.draw)
+
+  list(model = M, results = results)
 
 }
