@@ -308,3 +308,17 @@ read_exported_now_mcq <- function(data_dir){
     dplyr::select(nid, firstname, lastname, item, score, correct, weight)
 
 }
+
+
+#' Get list of marksheets from a directory
+#'
+#' @param path The path of the directory from which to extract marksheets
+#'
+#' @return A tibble with one column named `marksheet` with marksheet files
+#' @export
+get_completed_marksheets <- function(path){
+
+  fs::dir_ls(path, glob = '*_marksheet.docx') %>%
+  fs::path_file() %>%
+    tibble::as_tibble_col(column_name = 'marksheet')
+}

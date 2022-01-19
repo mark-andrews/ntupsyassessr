@@ -2,6 +2,7 @@
 
 export("%>%")
 export(anonymise_submissions)
+export(get_completed_marksheets)
 export(get_dropbox_submissions)
 export(get_rm2_marking_staff)
 export(get_seminar_list)
