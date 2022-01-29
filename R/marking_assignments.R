@@ -36,7 +36,7 @@ get_dropbox_submissions <- function(dropbox_directory, most_recent_submission = 
 
   tmp_df <- fs::dir_ls(path = dropbox_directory) %>%
     purrr::map_chr(tools::md5sum) %>%
-    tibble::enframe(name = 'path', value = 'hash') %>%
+    tibble::enframe(name = 'path', value = 'md5sum') %>%
     dplyr::mutate(fname = fs::path_file(path)) %>%
     dplyr::mutate(match = purrr::map(fname, parse_dropbox_fname)) %>%
     tidyr::unnest_wider(match) %>%
@@ -45,7 +45,7 @@ get_dropbox_submissions <- function(dropbox_directory, most_recent_submission = 
   if (most_recent_submission){
 
     get_most_recent_submission <- function(submissions){
-      dplyr::slice(dplyr::arrange(submissions, dply::desc(tstamp)), 1)
+      dplyr::slice(dplyr::arrange(submissions, dplyr::desc(tstamp)), 1)
     }
 
     tmp_df <- dplyr::group_by(tmp_df, id) %>%
@@ -56,8 +56,10 @@ get_dropbox_submissions <- function(dropbox_directory, most_recent_submission = 
       dplyr::ungroup()
   }
 
-  dplyr::mutate(tmp_df, ext = tools::file_ext(fname)) %>%
-    dplyr::select(id, fname, hash, ext)
+  dplyr::mutate(tmp_df, ext = tools::file_ext(fname),
+                crypto = stringr::str_sub(md5sum, end = 7L),
+                report = stringr::str_c(crypto, '_report.', ext)) %>%
+    dplyr::select(id, student, tstamp, fname, md5sum, ext, crypto, report)
 
 }
 
@@ -314,11 +316,33 @@ read_exported_now_mcq <- function(data_dir){
 #'
 #' @param path The path of the directory from which to extract marksheets
 #'
-#' @return A tibble with one column named `marksheet` with marksheet files
+#' @return A tibble with a column named `marksheet` with marksheet files, and
+#' another colname named `crypto` with 7 hex string.
 #' @export
 get_completed_marksheets <- function(path){
 
   fs::dir_ls(path, glob = '*_marksheet.docx') %>%
   fs::path_file() %>%
-    tibble::as_tibble_col(column_name = 'marksheet')
+    tibble::as_tibble_col(column_name = 'marksheet') %>%
+    mutate(crypto = stringr::str_match(marksheet, '(.*)_marksheet.docx')[,2])
+}
+
+
+#' Get the marking assignments from a marking assignments directory
+#'
+#' @param path Path to marking assignments dir. We assume that subfolders have
+#'   the name of the marker, and inside them are the names of the marksheets.
+#'
+#' @return A tibble with marker name and assigned marksheets
+#' @export
+get_marking_assignments <- function(path){
+
+  fs::dir_ls(recurse = T,
+             path = path,
+             glob = '*_marksheet.docx') %>%
+    stringr::str_match('.*/(.*)/(.*_marksheet.docx)') %>%
+    tibble::as_tibble(.name_repair = 'unique') %>%
+    dplyr::select(marker = 2, marksheet = 3)
+
+
 }

@@ -13,9 +13,11 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 
 
 RcppExport SEXP _rcpp_module_boot_stan_fit4irtv1_mod();
+RcppExport SEXP _rcpp_module_boot_stan_fit4moderation_null_step_10_logit_2_mod();
 
 static const R_CallMethodDef CallEntries[] = {
     {"_rcpp_module_boot_stan_fit4irtv1_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4irtv1_mod, 0},
+    {"_rcpp_module_boot_stan_fit4moderation_null_step_10_logit_2_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4moderation_null_step_10_logit_2_mod, 0},
     {NULL, NULL, 0}
 };
 

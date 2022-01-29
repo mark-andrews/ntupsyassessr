@@ -10,7 +10,8 @@ get_completed_marksheets(path)
 \item{path}{The path of the directory from which to extract marksheets}
 }
 \value{
-A tibble with one column named \code{marksheet} with marksheet files
+A tibble with a column named \code{marksheet} with marksheet files, and
+another colname named \code{crypto} with 7 hex string.
 }
 \description{
 Get list of marksheets from a directory
