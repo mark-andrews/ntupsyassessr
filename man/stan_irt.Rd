@@ -4,7 +4,7 @@
 \alias{stan_irt}
 \title{Bayesian Item Response Theory Model}
 \usage{
-stan_irt(formula, data, ...)
+stan_irt(formula, data, c = NULL, ...)
 }
 \arguments{
 \item{formula}{A formula like score ~ person + item. The lhs is the binary
@@ -13,6 +13,8 @@ score or accuracy variable. The rhs gives the person
 that order.}
 
 \item{data}{The data frame with the required variables}
+
+\item{c}{Optional guessing parameter. 0 < c < 1.}
 
 \item{...}{Optional extra parameters for rstan, e.g. cores = 4.}
 }

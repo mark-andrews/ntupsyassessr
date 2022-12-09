@@ -11,9 +11,6 @@ hpl_assignments(submissions, K = 15)
 
 For each seminar}
 }
-\value{
-
-}
 \description{
 Assign marking assignments to HPLs
 }

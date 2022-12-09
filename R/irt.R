@@ -6,6 +6,7 @@
 #'   score or accuracy variable. The rhs gives the person
 #'   (student/respondent/subject/participant) and item (question) variables, in
 #'   that order.
+#' @param c Optional guessing parameter. 0 < c < 1.
 #' @param data The data frame with the required variables
 #' @param ... Optional extra parameters for rstan, e.g. cores = 4.
 #'
@@ -15,7 +16,7 @@
 #' \dontrun{
 #' M <- stan_irt(score ~ nid + item, data = exam_df)
 #' }
-stan_irt <- function(formula, data, ...) {
+stan_irt <- function(formula, c = NULL, data, ...) {
 
   stopifnot(formula.tools::is.two.sided(formula))
 
@@ -52,6 +53,16 @@ stan_irt <- function(formula, data, ...) {
     K <- length(unique(item))
 
   })
+
+  if (!is.null(c)){
+    # if c is not null, and 0 < c < 1, then use model irtv2
+    # which has a guessing parameter
+    stopifnot((0 < c) & (1 > c))
+    model_data[['c']] <- c
+    M <- rstan::sampling(stanmodels$irtv2, data = model_data, ...)
+  } else {
+    M <- rstan::sampling(stanmodels$irtv1, data = model_data, ...)
+  }
 
   M <- rstan::sampling(stanmodels$irtv1, data = model_data, ...)
 

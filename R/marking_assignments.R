@@ -278,7 +278,7 @@ anonymise_submissions <- function(dropbox_directory, newdir) {
     c(original = original, anonymous = crypto)
   }
 
-  pmap_dfr(submissions_df, ggg)
+  purrr::pmap_dfr(submissions_df, ggg)
 
 }
 

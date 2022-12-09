@@ -11,9 +11,6 @@ anonymise_submissions(dropbox_directory, newdir)
 
 \item{newdir}{}
 }
-\value{
-
-}
 \description{
 Anonymise all submissions to a NOW dropbox
 }

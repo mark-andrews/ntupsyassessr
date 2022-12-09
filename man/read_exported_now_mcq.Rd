@@ -9,9 +9,6 @@ read_exported_now_mcq(data_dir)
 \arguments{
 \item{dat_dir}{Path name of a directory with NOW MCQ exported csv files}
 }
-\value{
-
-}
 \description{
 Read in Exported NOW MCQ Exam CSV files
 }
